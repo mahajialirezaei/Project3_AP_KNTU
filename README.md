@@ -1,4 +1,3 @@
-Here's a well-structured `README.md` for **Project3_AP_KNTU**, considering it as the continuation of **Project2_AP_KNTU**:  
 
 ---
 
