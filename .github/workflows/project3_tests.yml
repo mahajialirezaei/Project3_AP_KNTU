@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  unit-tests:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,19 +36,36 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run unit tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+      - name: Run tests (auto-detect)
+        run: |
+          if [ -f settings.gradle ] || [ -f settings.gradle.kts ] ; then
+            if grep -q "include ':app'" settings.gradle 2>/dev/null || grep -q "include(':app')" settings.gradle.kts 2>/dev/null || [ -d "app" ]; then
+              ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+            else
+              ./gradlew test --no-daemon --stacktrace
+            fi
+          else
+            if [ -d "app" ]; then
+              ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+            else
+              ./gradlew test --no-daemon --stacktrace
+            fi
+          fi
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: app/build/test-results
+          path: |
+            app/build/test-results
+            build/test-results
 
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: app/build/reports/tests
+          path: |
+            app/build/reports/tests
+            build/reports/tests
